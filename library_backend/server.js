@@ -1,11 +1,15 @@
 const express = require('express');
 const app = express();
-
+const cors = require('cors');
 
 // Middleware
 app.use(express.json());
 
 // Routes
+app.use(cors({
+  origin: 'http://localhost:3000', // Your frontend URL
+  credentials: true
+}));
 
 app.use('/api/entries', require('./routes/entries'));
 app.use('/api/students', require('./routes/students'));
