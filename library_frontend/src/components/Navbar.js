@@ -6,7 +6,7 @@ const Navbar = () => {
     <nav className="bg-gray-800 text-white p-3">
       <ul className="flex space-x-4">
         <li>
-          <Link to="/check-in" className="hover:text-gray-400">
+          <Link to="/" className="hover:text-gray-400">
             Check In
           </Link>
         </li>
