@@ -3,15 +3,18 @@ import axios from 'axios';
 
 const CheckOut = () => {
   const [checkedInStudents, setCheckedInStudents] = useState([]);
+  const [filteredStudents, setFilteredStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [bookNumber, setBookNumber] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Fetch all students currently checked in
   const fetchCheckedInStudents = async () => {
     try {
       const response = await axios.get('http://localhost:5000/entries/checked-in');
       setCheckedInStudents(response.data);
+      setFilteredStudents(response.data);  // Initialize filtered students
     } catch (error) {
       console.error('Error fetching checked-in students:', error);
     }
@@ -20,6 +23,22 @@ const CheckOut = () => {
   useEffect(() => {
     fetchCheckedInStudents();
   }, []);
+
+  // Handle Search Query Change
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+
+    if (query === '') {
+      setFilteredStudents(checkedInStudents); // Reset filter if search is empty
+    } else {
+      const filtered = checkedInStudents.filter((student) =>
+        student.usn.toLowerCase().includes(query.toLowerCase()) ||
+        student.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredStudents(filtered); // Filter students based on search query
+    }
+  };
 
   // Handle Check-Out process
   const handleCheckOut = async (usn) => {
@@ -40,6 +59,7 @@ const CheckOut = () => {
 
       setMessage(`Check-out successful. Duration: ${durationMessage}`);
       setCheckedInStudents((prev) => prev.filter((student) => student.usn !== usn));
+      setFilteredStudents((prev) => prev.filter((student) => student.usn !== usn));
     } catch (error) {
       console.error('Check-out error:', error);
       setMessage('Failed to check out.');
@@ -51,11 +71,21 @@ const CheckOut = () => {
   return (
     <div className="p-5">
       <h2 className="text-xl mb-3">Library Check-Out</h2>
+      
+      {/* Search Bar */}
+      <input
+        type="text"
+        placeholder="Search by USN or Name"
+        value={searchQuery}
+        onChange={handleSearchChange}
+        className="border p-2 mb-3 w-full"
+      />
+      
       {message && <p className="mb-3 text-green-500">{message}</p>}
       
-      {checkedInStudents.length > 0 ? (
+      {filteredStudents.length > 0 ? (
         <ul>
-          {checkedInStudents.map((student) => (
+          {filteredStudents.map((student) => (
             <li key={student.usn} className="mb-2 p-2 border flex justify-between items-center">
               <div>
                 <strong>{student.name}</strong> - {student.usn}

@@ -27,7 +27,7 @@ const StudentRegistry = () => {
     setMessage('');
 
     try {
-      const response = await axios.post('http://localhost:5000/students', formData);
+      await axios.post('http://localhost:5000/students', formData); // No need to store the response
       setMessage('Student registered successfully! Redirecting to Check In...');
       setTimeout(() => {
         navigate('/check-in');

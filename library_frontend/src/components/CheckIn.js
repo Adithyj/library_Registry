@@ -1,12 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import './checkin.css';
 
 const CheckIn = () => {
-  const [usn, setUsn] = useState('');
-  const [message, setMessage] = useState('');
+  const [usn, setUsn] = useState('');  // Current input value
+  const [suggestions, setSuggestions] = useState([]);  // Suggestions based on input
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (usn.length >= 3) {
+      // Fetch suggestions only if the input length is 3 or more characters
+      const fetchSuggestions = async () => {
+        setLoading(true);
+        try {
+          const response = await axios.get(`http://localhost:5000/students/search/${usn}`);
+          setSuggestions(response.data);
+        } catch (error) {
+          console.error('Error fetching suggestions:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchSuggestions();
+    } else {
+      setSuggestions([]);  // Clear suggestions if input is too short
+    }
+  }, [usn]);  // Re-run this effect whenever `usn` changes
 
   const handleCheckIn = async (e) => {
     e.preventDefault();
@@ -14,13 +37,9 @@ const CheckIn = () => {
     setMessage('');
 
     try {
-      console.log("Sending USN: ", usn); // ✅ Add this for debugging
-
       const response = await axios.post('http://localhost:5000/entries/check-in', {
-        usn: usn.trim() // ✅ Make sure there are no extra spaces
+        usn: usn.trim()
       });
-
-      console.log("Response: ", response.data); // ✅ Add this for debugging
 
       if (response.data.message.includes('not found')) {
         setMessage('Student not found. You can register below.');
@@ -28,7 +47,7 @@ const CheckIn = () => {
         setMessage('Check-in successful');
       }
     } catch (error) {
-      console.error("Error: ", error.response?.data); // ✅ Add this for debugging
+      console.error("Error: ", error.response?.data);
       setMessage(error.response?.data?.error || 'Server error');
     } finally {
       setLoading(false);
@@ -47,6 +66,21 @@ const CheckIn = () => {
           required
           className="border p-2 mb-3 w-full"
         />
+        
+        {usn && suggestions.length > 0 && (
+          <div className="suggestions">
+            {suggestions.map((student) => (
+              <div
+                key={student._id}
+                className="suggestion-item"
+                onClick={() => setUsn(student.usn)}
+              >
+                {student.usn} - {student.name}
+              </div>
+            ))}
+          </div>
+        )}
+
         <button
           type="submit"
           className={`p-2 bg-blue-500 text-white w-full ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -55,6 +89,7 @@ const CheckIn = () => {
           {loading ? 'Processing...' : 'Check-In'}
         </button>
       </form>
+
       {message && <p className="mt-3 text-green-500">{message}</p>}
       {message.includes('not found') && (
         <button

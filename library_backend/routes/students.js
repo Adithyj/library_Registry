@@ -59,4 +59,22 @@ router.delete('/:usn', async (req, res) => {
     }
 });
 
+// ➡️ Search for students by USN (for auto-suggest feature)
+router.get('/search/:query', async (req, res) => {
+    const query = req.params.query.toLowerCase();  // Get the query parameter and convert it to lowercase
+
+    try {
+        // Find students whose USN matches the query (case-insensitive)
+        const students = await Student.find({
+            usn: { $regex: query, $options: 'i' },  // Case-insensitive regex search
+        }).limit(5);  // Limit results to 5 suggestions
+
+        // Send the list of matching students
+        res.status(200).json(students);
+    } catch (error) {
+        console.error('Error fetching students:', error);
+        res.status(500).json({ error: 'Server error while searching students' });
+    }
+});
+
 module.exports = router;
