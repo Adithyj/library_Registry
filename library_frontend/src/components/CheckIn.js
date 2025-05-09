@@ -1,76 +1,71 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-function CheckIn() {
+const CheckIn = () => {
   const [usn, setUsn] = useState('');
-  const [bookNumber, setBookNumber] = useState('');
   const [message, setMessage] = useState('');
-  const [student, setStudent] = useState(null);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleCheckIn = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage('');
+
     try {
-      const response = await axios.post('http://localhost:5000/api/entries/check-in', { 
-        usn, 
-        bookNumber: bookNumber || null 
+      console.log("Sending USN: ", usn); // ✅ Add this for debugging
+
+      const response = await axios.post('http://localhost:5000/entries/check-in', {
+        usn: usn.trim() // ✅ Make sure there are no extra spaces
       });
-      
-      setStudent(response.data.student);
-      setMessage(response.data.message);
-      setError('');
-      setUsn('');
-      setBookNumber('');
-    } catch (err) {
-      setError(err.response?.data?.error || 'Error checking in');
-      setMessage('');
-      setStudent(null);
+
+      console.log("Response: ", response.data); // ✅ Add this for debugging
+
+      if (response.data.message.includes('not found')) {
+        setMessage('Student not found. You can register below.');
+      } else {
+        setMessage('Check-in successful');
+      }
+    } catch (error) {
+      console.error("Error: ", error.response?.data); // ✅ Add this for debugging
+      setMessage(error.response?.data?.error || 'Server error');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="card">
-      <h2>Library Check-In</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>USN</label>
-          <input
-            type="text"
-            value={usn}
-            onChange={(e) => setUsn(e.target.value)}
-            placeholder="Enter your USN"
-            required
-          />
-        </div>
-        
-        <div className="form-group">
-          <label>Book Number (Optional)</label>
-          <input
-            type="text"
-            value={bookNumber}
-            onChange={(e) => setBookNumber(e.target.value)}
-            placeholder="Enter book number if borrowing"
-          />
-        </div>
-        
-        <button type="submit">Check In</button>
+    <div className="p-5">
+      <h2 className="text-xl mb-3">Library Check-In</h2>
+      <form onSubmit={handleCheckIn}>
+        <input
+          type="text"
+          placeholder="Enter USN"
+          value={usn}
+          onChange={(e) => setUsn(e.target.value)}
+          required
+          className="border p-2 mb-3 w-full"
+        />
+        <button
+          type="submit"
+          className={`p-2 bg-blue-500 text-white w-full ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          disabled={loading}
+        >
+          {loading ? 'Processing...' : 'Check-In'}
+        </button>
       </form>
-      
-      {error && <p className="error">{error}</p>}
-      {message && <p className="success">{message}</p>}
-      
-      {student && (
-        <div className="student-info">
-          <h3>Check-In Confirmation:</h3>
-          <p><strong>Name:</strong> {student.name}</p>
-          <p><strong>USN:</strong> {student.usn}</p>
-          <p><strong>Department:</strong> {student.department}</p>
-          <p><strong>Semester:</strong> {student.semester}</p>
-          {student.bookCheckedIn && <p>✔ Book checked out</p>}
-        </div>
+      {message && <p className="mt-3 text-green-500">{message}</p>}
+      {message.includes('not found') && (
+        <button
+          className="mt-3 p-2 bg-red-500 text-white w-full"
+          onClick={() => navigate('/student-registry')}
+        >
+          Register Now
+        </button>
       )}
     </div>
   );
-}
+};
 
 export default CheckIn;

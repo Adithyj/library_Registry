@@ -5,8 +5,8 @@ const LibraryEntry = require('../model/LibraryEntry');
 const Student = require('../model/Student');
 
 // ➡️ Check-in
-// Check-in
-// Check-in
+
+
 router.post('/check-in', async (req, res) => {
   const { usn } = req.body;
 
@@ -100,6 +100,23 @@ router.post('/check-out', async (req, res) => {
         await entry.save();
 
         res.json({ message: 'Check-out successful', duration: `${entry.duration} minutes` });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+
+// Get all currently checked-in students
+router.get('/checked-in', async (req, res) => {
+    try {
+        const entries = await LibraryEntry.find({ exit_time: null }).populate('student_usn');
+        const students = await Promise.all(entries.map(async (entry) => {
+            const student = await Student.findOne({ usn: entry.student_usn });
+            return student ? { name: student.name, usn: student.usn } : null;
+        }));
+
+        res.status(200).json(students.filter(Boolean));
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Server error' });

@@ -1,69 +1,89 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-function CheckOut() {
-  const [usn, setUsn] = useState('');
-  const [bookNumber, setBookNumber] = useState('');
+const CheckOut = () => {
+  const [checkedInStudents, setCheckedInStudents] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
+  const [bookNumber, setBookNumber] = useState('');
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // Fetch all students currently checked in
+  const fetchCheckedInStudents = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/entries/check-out', { 
-        usn, 
-        bookNumber: bookNumber || null 
+      const response = await axios.get('http://localhost:5000/entries/checked-in');
+      setCheckedInStudents(response.data);
+    } catch (error) {
+      console.error('Error fetching checked-in students:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCheckedInStudents();
+  }, []);
+
+  // Handle Check-Out process
+  const handleCheckOut = async (usn) => {
+    setLoading(true);
+    setMessage('');
+    
+    try {
+      const response = await axios.post('http://localhost:5000/entries/check-out', {
+        usn,
+        bookNumber: bookNumber || null
       });
-      
-      setMessage(response.data.message);
-      setError('');
-      setUsn('');
-      setBookNumber('');
-    } catch (err) {
-      setError(err.response?.data?.error || 'Error checking out');
-      setMessage('');
+
+      // Handle duration message
+      let durationMessage = response.data.duration;
+      if (response.data.duration === "0 minutes") {
+        durationMessage = "less than a minute";
+      }
+
+      setMessage(`Check-out successful. Duration: ${durationMessage}`);
+      setCheckedInStudents((prev) => prev.filter((student) => student.usn !== usn));
+    } catch (error) {
+      console.error('Check-out error:', error);
+      setMessage('Failed to check out.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="card">
-      <h2>Library Check-Out</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>USN</label>
-          <input
-            type="text"
-            value={usn}
-            onChange={(e) => setUsn(e.target.value)}
-            placeholder="Enter your USN"
-            required
-          />
-        </div>
-        
-        <div className="form-group">
-          <label>Book Number (If returning)</label>
-          <input
-            type="text"
-            value={bookNumber}
-            onChange={(e) => setBookNumber(e.target.value)}
-            placeholder="Enter book number if returning"
-          />
-        </div>
-        
-        <button type="submit">Check Out</button>
-      </form>
+    <div className="p-5">
+      <h2 className="text-xl mb-3">Library Check-Out</h2>
+      {message && <p className="mb-3 text-green-500">{message}</p>}
       
-      {error && <p className="error">{error}</p>}
-      {message && (
-        <div className="success">
-          <p>{message}</p>
-          {message.includes('successful') && (
-            <p>Duration: {message.split('Duration: ')[1]}</p>
-          )}
-        </div>
+      {checkedInStudents.length > 0 ? (
+        <ul>
+          {checkedInStudents.map((student) => (
+            <li key={student.usn} className="mb-2 p-2 border flex justify-between items-center">
+              <div>
+                <strong>{student.name}</strong> - {student.usn}
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="text"
+                  placeholder="Book Number (if any)"
+                  value={bookNumber}
+                  onChange={(e) => setBookNumber(e.target.value)}
+                  className="border p-1 mr-2"
+                />
+                <button
+                  onClick={() => handleCheckOut(student.usn)}
+                  disabled={loading}
+                  className={`p-2 bg-red-500 text-white ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {loading ? 'Processing...' : 'Check Out'}
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No students currently checked in.</p>
       )}
     </div>
   );
-}
+};
 
 export default CheckOut;
