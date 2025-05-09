@@ -1,42 +1,61 @@
+// routes/student.js
 const express = require('express');
 const router = express.Router();
 const Student = require('../model/Student');
-const LibraryEntry = require('../model/LibraryEntry');
 
-// Get all students
+// ➡️ Create a new student
+router.post('/', async (req, res) => {
+    const { usn, name, department, semester, email, phone } = req.body;
+    if (!usn || !name || !department || !semester) {
+        return res.status(400).json({ message: 'Missing required fields: usn, name, department, semester' });
+    }
+
+    try {
+        const newStudent = new Student({ usn, name, department, semester, email, phone });
+        await newStudent.save();
+        res.status(201).json({ message: 'Student created successfully', student: newStudent });
+    } catch (err) {
+        res.status(500).json({ message: 'Error creating student', error: err.message });
+    }
+});
+
+// ➡️ Get all students
 router.get('/', async (req, res) => {
     try {
         const students = await Student.find();
-        res.json(students);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(200).json(students);
+    } catch (err) {
+        res.status(500).json({ message: 'Error fetching students', error: err.message });
     }
 });
 
-// Update all semesters
-router.post('/update-semesters', async (req, res) => {
+// ➡️ Get a student by USN
+router.get('/:usn', async (req, res) => {
     try {
-        await Student.updateMany({}, { $inc: { semester: 1 } });
-        await LibraryEntry.updateMany({ exit_time: null }, { $inc: { semester: 1 } });
-        res.json({ message: 'All students advanced to next semester' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Server error' });
+        const student = await Student.findOne({ usn: req.params.usn });
+        student ? res.status(200).json(student) : res.status(404).json({ message: 'Student not found' });
+    } catch (err) {
+        res.status(500).json({ message: 'Error fetching student', error: err.message });
     }
 });
 
-// Update individual student
+// ➡️ Update a student
 router.put('/:usn', async (req, res) => {
-    const { usn } = req.params;
-    const { semester } = req.body;
-
     try {
-        await Student.updateOne({ usn }, { $set: { semester } });
-        res.json({ message: 'Student updated successfully' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Server error' });
+        const updatedStudent = await Student.findOneAndUpdate({ usn: req.params.usn }, req.body, { new: true });
+        updatedStudent ? res.status(200).json(updatedStudent) : res.status(404).json({ message: 'Student not found' });
+    } catch (err) {
+        res.status(500).json({ message: 'Error updating student', error: err.message });
+    }
+});
+
+// ➡️ Delete a student
+router.delete('/:usn', async (req, res) => {
+    try {
+        const deletedStudent = await Student.findOneAndDelete({ usn: req.params.usn });
+        deletedStudent ? res.status(200).json(deletedStudent) : res.status(404).json({ message: 'Student not found' });
+    } catch (err) {
+        res.status(500).json({ message: 'Error deleting student', error: err.message });
     }
 });
 
