@@ -5,6 +5,7 @@ import CheckOut from './components/CheckOut';
 import StudentRegistry from './components/StudentRegistry';
 import Navbar from './components/Navbar';
 import './styles.css';
+import Footer from './components/Footer'; 
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/student-registry" element={<StudentRegistry key="student-registry" />} />
         </Routes>
       </div>
+       <Footer />
     </Router>
   );
 }

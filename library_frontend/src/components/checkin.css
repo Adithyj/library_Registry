@@ -1,83 +1,222 @@
+/* checkin.css */
 
-.container {
-  padding: 20px;
-  max-width: 400px;
-  margin: auto;
-  font-family: Arial, sans-serif;
-  background-color: #f9f9f9;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+/* Main container styling */
+body {
+  background-image: url('https://sahyadri.edu.in/_next/image?url=%2Fimages%2Fhome%2Fcollegeaerial.jpg&w=3840&q=75');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  position: relative;
+}
+.p-5 {
+  max-width: 800px;
+  margin: 2rem auto;
+  background: linear-gradient(145deg, #ffffff, #f5f7fa);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  padding: 8rem !important;
+  transition: all 0.3s ease;
 }
 
-.heading {
-  font-size: 24px;
-  margin-bottom: 20px;
+.p-5:hover {
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Heading styles */
+h2.text-xl {
+  color: #2c3e50;
+  font-size: 1.8rem !important;
+  font-weight: 600;
+  margin-bottom: 1.5rem !important;
   text-align: center;
+  position: relative;
+  padding-bottom: 10px;
 }
 
-.input {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
+h2.text-xl:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, #3498db, #2c3e50);
+  border-radius: 3px;
 }
 
-.button {
+/* Form styling */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Input field styling */
+input[type="text"] {
+  border: 2px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  padding: 0.75rem 1rem !important;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   width: 100%;
-  padding: 10px;
-  font-size: 16px;
-  background-color: #007bff;
+  outline: none;
+}
+
+input[type="text"]:focus {
+  border-color: #3498db !important;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+}
+
+input[type="text"]::placeholder {
+  color: #a0aec0;
+}
+
+/* Button styling */
+button[type="submit"] {
+  background: linear-gradient(135deg, #3498db, #2980b9) !important;
   border: none;
-  color: white;
-  border-radius: 5px;
+  border-radius: 8px;
+  padding: 0.75rem !important;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(52, 152, 219, 0.25);
   cursor: pointer;
 }
 
-.button:disabled {
-  opacity: 0.5;
+button[type="submit"]:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2980b9, #2573a7) !important;
+  box-shadow: 0 6px 10px rgba(52, 152, 219, 0.3);
+  transform: translateY(-1px);
+}
+
+button[type="submit"]:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 2px 5px rgba(52, 152, 219, 0.2);
+}
+
+button[type="submit"]:disabled {
   cursor: not-allowed;
 }
 
-.message {
-  margin-top: 15px;
-  color: green;
-  font-weight: bold;
-  text-align: center;
-}
-
-.registerButton {
-  margin-top: 15px;
-  width: 100%;
-  padding: 10px;
-  font-size: 16px;
-  background-color: #dc3545;
+/* Register Now button styling */
+button.bg-red-500 {
+  background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
   border: none;
-  color: white;
-  border-radius: 5px;
+  border-radius: 8px;
+  padding: 0.75rem !important;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(231, 76, 60, 0.25);
   cursor: pointer;
 }
-/* checkin.css */
 
+button.bg-red-500:hover {
+  background: linear-gradient(135deg, #c0392b, #a93226) !important;
+  box-shadow: 0 6px 10px rgba(231, 76, 60, 0.3);
+  transform: translateY(-1px);
+}
+
+button.bg-red-500:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 5px rgba(231, 76, 60, 0.2);
+}
+
+/* Suggestions container */
 .suggestions {
-  position: absolute;
-  top: 50px;  /* Adjust as needed */
-  left: 0;
-  right: 0;
   background-color: white;
-  border: 1px solid #ccc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   max-height: 200px;
   overflow-y: auto;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 10;
+  position: relative;
 }
 
+/* Individual suggestion item */
 .suggestion-item {
-  padding: 8px;
+  padding: 0.75rem 1rem;
   cursor: pointer;
-  border-bottom: 1px solid #ddd;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .suggestion-item:hover {
-  background-color: #f0f0f0;
+  background-color: #f1f5f9;
+  color: #3498db;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+/* Message styling */
+p.mt-3 {
+  padding: 0.75rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+  margin-top: 1rem !important;
+  animation: fadeIn 0.5s ease;
+}
+
+p.text-green-500 {
+  background-color: rgba(39, 174, 96, 0.1);
+  color: #27ae60 !important;
+  border: 1px solid rgba(39, 174, 96, 0.2);
+}
+
+/* Loading animation */
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+button:disabled {
+  animation: pulse 1.5s infinite;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Add a loading spinner for the button */
+button[type="submit"]:disabled:after {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-left: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s linear infinite;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .p-5 {
+    margin: 1rem;
+    padding: 1.5rem !important;
+  }
+  
+  h2.text-xl {
+    font-size: 1.5rem !important;
+  }
 }

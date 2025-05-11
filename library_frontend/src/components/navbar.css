@@ -1,40 +1,116 @@
-.navbar {
-  background-color: #1f2937; /* Dark gray background */
-  color: white;
-  padding: 0.75rem 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+/* navbar.css */
+
+/* Base navbar styling */
+nav {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.navbar ul {
+/* List styling */
+nav ul {
   display: flex;
-  gap: 1.5rem;
-  list-style: none;
+  justify-content: center;
+  align-items: center;
   margin: 0;
   padding: 0;
+  list-style-type: none;
+  gap: 1rem;
 }
 
-.navbar li {
-  display: inline-block;
-}
-
-.navbar a {
-  color: white;
+/* Link styling */
+nav a {
   text-decoration: none;
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 500;
   font-size: 1rem;
-  transition: color 0.3s ease;
+  padding: 0.5rem 1.2rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  letter-spacing: 0.02em;
+  position: relative;
+  overflow: hidden;
 }
 
-.navbar a:hover {
-  color: #9ca3af; /* Light gray on hover */
+/* Create beautiful hover effect */
+nav a:before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: #60a5fa;
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
 }
 
-@media (max-width: 600px) {
-  .navbar ul {
-    flex-direction: column;
-    gap: 0.75rem;
-    align-items: flex-start;
+nav a:hover {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+nav a:hover:before {
+  width: 80%;
+}
+
+nav a:active {
+  transform: translateY(1px);
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Active link styling */
+nav a.active {
+  background-color: rgba(96, 165, 250, 0.15);
+  color: #fff;
+}
+
+nav a.active:before {
+  width: 80%;
+  background: #60a5fa;
+}
+
+/* Add a subtle glow effect for active items */
+nav a.active {
+  box-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  nav {
+    padding: 0.6rem 1rem;
   }
+  
+  nav ul {
+    justify-content: space-around;
+    width: 100%;
+  }
+  
+  nav a {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Add a subtle animation when the page loads */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+nav {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+/* Stagger the animation for the nav items */
+nav li:nth-child(1) { animation: fadeIn 0.5s ease 0.1s forwards; }
+nav li:nth-child(2) { animation: fadeIn 0.5s ease 0.2s forwards; }
+nav li:nth-child(3) { animation: fadeIn 0.5s ease 0.3s forwards; }
+
+nav li {
+  opacity: 0;
 }
