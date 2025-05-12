@@ -42,7 +42,15 @@ const StudentRegistry = () => {
 
   return (
     <div className="p-5">
+      {/* Logo Section */}
+      <div className="logo-container">
+        <img src="/title_logo.jpg" alt="Logo" className="logo" />
+      </div>
+
+      {/* Title Section */}
       <h2 className="text-xl mb-3">Student Registry</h2>
+
+      {/* Form */}
       <form onSubmit={handleSubmit}>
         <input
           type="text"
@@ -104,6 +112,8 @@ const StudentRegistry = () => {
           {loading ? 'Registering...' : 'Register'}
         </button>
       </form>
+
+      {/* Message */}
       {message && <p className="mt-3 text-green-500">{message}</p>}
     </div>
   );

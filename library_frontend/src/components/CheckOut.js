@@ -70,6 +70,12 @@ const CheckOut = () => {
 
   return (
     <div className="p-5">
+      {/* Logo Section */}
+      <div className="logo-container">
+        <img src="/title_logo.jpg" alt="Logo" className="logo" />
+      </div>
+
+      {/* Title Section */}
       <h2 className="text-xl mb-3">Library Check-Out</h2>
       
       {/* Search Bar */}

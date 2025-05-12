@@ -4,15 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import './checkin.css';
 
 const CheckIn = () => {
-  const [usn, setUsn] = useState('');  // Current input value
-  const [suggestions, setSuggestions] = useState([]);  // Suggestions based on input
+  const [usn, setUsn] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     if (usn.length >= 3) {
-      // Fetch suggestions only if the input length is 3 or more characters
       const fetchSuggestions = async () => {
         setLoading(true);
         try {
@@ -24,12 +23,11 @@ const CheckIn = () => {
           setLoading(false);
         }
       };
-
       fetchSuggestions();
     } else {
-      setSuggestions([]);  // Clear suggestions if input is too short
+      setSuggestions([]);
     }
-  }, [usn]);  // Re-run this effect whenever `usn` changes
+  }, [usn]);
 
   const handleCheckIn = async (e) => {
     e.preventDefault();
@@ -55,8 +53,14 @@ const CheckIn = () => {
   };
 
   return (
-    <div className="p-5">
+    <div className="p-5 text-center">
+      {/* Logo section */}
+      <div className="logo-container">
+        <img src="/title_logo.jpg" alt="Logo" className="logo" />
+      </div>
+
       <h2 className="text-xl mb-3">Library Check-In</h2>
+
       <form onSubmit={handleCheckIn}>
         <input
           type="text"
@@ -66,7 +70,7 @@ const CheckIn = () => {
           required
           className="border p-2 mb-3 w-full"
         />
-        
+
         {usn && suggestions.length > 0 && (
           <div className="suggestions">
             {suggestions.map((student) => (
@@ -91,6 +95,7 @@ const CheckIn = () => {
       </form>
 
       {message && <p className="mt-3 text-green-500">{message}</p>}
+
       {message.includes('not found') && (
         <button
           className="mt-3 p-2 bg-red-500 text-white w-full"

@@ -176,3 +176,16 @@
     padding: 0.75rem 1rem;
   }
 }
+.logo-container {
+  width: 100%;
+  max-width: 400px;  /* Adjust width to your desired size */
+  margin: 0 auto 1rem auto;  /* Center horizontally and give bottom margin */
+}
+
+/* Logo image styling */
+.logo {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;  /* ensures the image scales without cropping */
+}

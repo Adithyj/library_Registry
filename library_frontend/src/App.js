@@ -14,6 +14,7 @@ function App() {
       <div className="container">
         <Routes>
           <Route path="/" element={<CheckIn key="check-in" />} />       {/* 👈 Add key here */}
+          <Route path="/check-in" element={<CheckIn key="check-in-route" />} /> {/* ✅ Added */}
           <Route path="/check-out" element={<CheckOut key="check-out" />} />
           <Route path="/student-registry" element={<StudentRegistry key="student-registry" />} />
         </Routes>

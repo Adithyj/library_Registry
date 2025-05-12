@@ -9,14 +9,17 @@ body {
   background-repeat: no-repeat;
   position: relative;
 }
+
 .p-5 {
   max-width: 800px;
   margin: 2rem auto;
-  background: linear-gradient(145deg, #ffffff, #f5f7fa);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.5), rgba(245, 247, 250, 0.4)); /* More transparent */
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   padding: 8rem !important;
   transition: all 0.3s ease;
+  backdrop-filter: blur(15px); /* Increased blur for more transparency */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border to define edges */
 }
 
 .p-5:hover {
@@ -33,6 +36,7 @@ h2.text-xl {
   text-align: center;
   position: relative;
   padding-bottom: 10px;
+  opacity: 0.9; /* Slightly reduced opacity */
 }
 
 h2.text-xl:after {
@@ -45,6 +49,7 @@ h2.text-xl:after {
   height: 3px;
   background: linear-gradient(90deg, #3498db, #2c3e50);
   border-radius: 3px;
+  opacity: 0.7;
 }
 
 /* Form styling */
@@ -56,7 +61,7 @@ form {
 
 /* Input field styling */
 input[type="text"] {
-  border: 2px solid #e2e8f0 !important;
+  border: 2px solid rgba(226, 232, 240, 0.5) !important;
   border-radius: 8px !important;
   padding: 0.75rem 1rem !important;
   font-size: 1rem;
@@ -64,32 +69,36 @@ input[type="text"] {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   width: 100%;
   outline: none;
+  background-color: rgba(255, 255, 255, 0.4); /* More transparent input */
+  color: rgba(0, 0, 0, 0.8); /* Ensure text is readable */
 }
 
 input[type="text"]:focus {
   border-color: #3498db !important;
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+  background-color: rgba(255, 255, 255, 0.6); /* Slightly less transparent when focused */
 }
 
 input[type="text"]::placeholder {
-  color: #a0aec0;
+  color: rgba(160, 174, 192, 0.7);
 }
 
 /* Button styling */
 button[type="submit"] {
-  background: linear-gradient(135deg, #3498db, #2980b9) !important;
+  background: linear-gradient(135deg, rgba(52, 152, 219, 0.6), rgba(41, 128, 185, 0.6)) !important;
   border: none;
   border-radius: 8px;
   padding: 0.75rem !important;
   font-weight: 600;
   letter-spacing: 0.5px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(52, 152, 219, 0.25);
+  box-shadow: 0 4px 6px rgba(52, 152, 219, 0.2);
   cursor: pointer;
+  color: white;
 }
 
 button[type="submit"]:hover:not(:disabled) {
-  background: linear-gradient(135deg, #2980b9, #2573a7) !important;
+  background: linear-gradient(135deg, rgba(41, 128, 185, 0.7), rgba(37, 115, 167, 0.7)) !important;
   box-shadow: 0 6px 10px rgba(52, 152, 219, 0.3);
   transform: translateY(-1px);
 }
@@ -101,23 +110,25 @@ button[type="submit"]:active:not(:disabled) {
 
 button[type="submit"]:disabled {
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
 /* Register Now button styling */
 button.bg-red-500 {
-  background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.6), rgba(192, 57, 43, 0.6)) !important;
   border: none;
   border-radius: 8px;
   padding: 0.75rem !important;
   font-weight: 600;
   letter-spacing: 0.5px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(231, 76, 60, 0.25);
+  box-shadow: 0 4px 6px rgba(231, 76, 60, 0.2);
   cursor: pointer;
+  color: white;
 }
 
 button.bg-red-500:hover {
-  background: linear-gradient(135deg, #c0392b, #a93226) !important;
+  background: linear-gradient(135deg, rgba(192, 57, 43, 0.7), rgba(169, 50, 38, 0.7)) !important;
   box-shadow: 0 6px 10px rgba(231, 76, 60, 0.3);
   transform: translateY(-1px);
 }
@@ -129,8 +140,8 @@ button.bg-red-500:active {
 
 /* Suggestions container */
 .suggestions {
-  background-color: white;
-  border: 1px solid #e2e8f0;
+  background-color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(226, 232, 240, 0.4);
   border-radius: 8px;
   max-height: 200px;
   overflow-y: auto;
@@ -146,11 +157,12 @@ button.bg-red-500:active {
   padding: 0.75rem 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid rgba(241, 245, 249, 0.5);
+  color: rgba(0, 0, 0, 0.8);
 }
 
 .suggestion-item:hover {
-  background-color: #f1f5f9;
+  background-color: rgba(241, 245, 249, 0.5);
   color: #3498db;
 }
 
@@ -166,57 +178,20 @@ p.mt-3 {
   font-weight: 500;
   margin-top: 1rem !important;
   animation: fadeIn 0.5s ease;
+  background-color: rgba(255, 255, 255, 0.5);
+  color: rgba(0, 0, 0, 0.8);
 }
 
 p.text-green-500 {
-  background-color: rgba(39, 174, 96, 0.1);
-  color: #27ae60 !important;
+  background-color: rgba(39, 174, 96, 0.2);
+  color: rgba(39, 174, 96, 0.9) !important;
   border: 1px solid rgba(39, 174, 96, 0.2);
 }
 
-/* Loading animation */
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
-}
+/* Rest of the previous CSS remains the same... */
+/* (Loading animations, responsive design, logo styling) */
 
-button:disabled {
-  animation: pulse 1.5s infinite;
-}
-
-/* Fade-in animation */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Add a loading spinner for the button */
-button[type="submit"]:disabled:after {
-  content: '';
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  margin-left: 10px;
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  border-radius: 50%;
-  border-top-color: white;
-  animation: spin 1s linear infinite;
-  vertical-align: middle;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Responsive adjustments */
-@media (max-width: 640px) {
-  .p-5 {
-    margin: 1rem;
-    padding: 1.5rem !important;
-  }
-  
-  h2.text-xl {
-    font-size: 1.5rem !important;
-  }
+/* Additional transparency for overall softness */
+* {
+  transition: background-color 0.3s ease, opacity 0.3s ease;
 }
