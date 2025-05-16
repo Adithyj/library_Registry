@@ -1,9 +1,14 @@
-const mongoose = require('mongoose');
-require('dotenv').config();
+// db.js
+const { Pool } = require('pg');
+require('dotenv').config();  // <-- load .env
 
-mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
-.then(() => console.log("🌐 MongoDB Connected Successfully!"))
-.catch((err) => console.error("❌ MongoDB Connection Error: ", err));
+const pool = new Pool({
+  connectionString: process.env.POSTGRES_URL,
+  ssl: { rejectUnauthorized: false }
+});
+
+pool.connect()
+  .then(() => console.log('🌐 PostgreSQL Connected Successfully!'))
+  .catch(err => console.error('❌ PostgreSQL Connection Error: ', err));
+
+module.exports = pool;
