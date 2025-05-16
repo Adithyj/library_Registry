@@ -1,7 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './checkin.css';
+
+// Debounce function to limit API calls
+const debounce = (func, wait) => {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+};
 
 const CheckIn = () => {
   const [usn, setUsn] = useState('');
@@ -9,33 +18,52 @@ const CheckIn = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
+  
+  // Create axios instance with timeout
+  const api = axios.create({
+    timeout: 5000 // 5 seconds timeout
+  });
 
-  useEffect(() => {
-    if (usn.length >= 3) {
-      const fetchSuggestions = async () => {
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    debounce(async (searchTerm) => {
+      if (searchTerm.length >= 3) {
         setLoading(true);
         try {
-          const response = await axios.get(`http://localhost:5000/students/search/${usn}`);
+          const response = await api.get(`http://localhost:5000/api/students/search/${searchTerm}`);
           setSuggestions(response.data);
         } catch (error) {
           console.error('Error fetching suggestions:', error);
+          // Don't show error to user for search suggestions
         } finally {
           setLoading(false);
         }
-      };
-      fetchSuggestions();
-    } else {
-      setSuggestions([]);
-    }
-  }, [usn]);
+      } else {
+        setSuggestions([]);
+      }
+    }, 300), // 300ms debounce
+    []
+  );
+
+  // Effect for searching
+  useEffect(() => {
+    debouncedSearch(usn);
+    
+    // Cleanup function
+    return () => {
+      // Cancel any pending debounced calls when component unmounts
+    };
+  }, [usn, debouncedSearch]);
 
   const handleCheckIn = async (e) => {
     e.preventDefault();
+    if (!usn.trim()) return;
+    
     setLoading(true);
     setMessage('');
 
     try {
-      const response = await axios.post('http://localhost:5000/entries/check-in', {
+      const response = await api.post('http://localhost:5000/api/entries/check-in', {
         usn: usn.trim()
       });
 
@@ -43,13 +71,27 @@ const CheckIn = () => {
         setMessage('Student not found. You can register below.');
       } else {
         setMessage('Check-in successful');
+        // Clear the input after successful check-in
+        setUsn('');
+        setSuggestions([]);
       }
     } catch (error) {
-      console.error("Error: ", error.response?.data);
-      setMessage(error.response?.data?.error || 'Server error');
+      console.error("Error: ", error);
+      if (error.response) {
+        setMessage(error.response?.data?.error || 'Server error');
+      } else if (error.request) {
+        setMessage('Network error. Please check your connection.');
+      } else {
+        setMessage('Something went wrong. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSuggestionClick = (selectedUsn) => {
+    setUsn(selectedUsn);
+    setSuggestions([]); // Clear suggestions after selection
   };
 
   return (
@@ -75,9 +117,9 @@ const CheckIn = () => {
           <div className="suggestions">
             {suggestions.map((student) => (
               <div
-                key={student._id}
+                key={student._id || student.usn}
                 className="suggestion-item"
-                onClick={() => setUsn(student.usn)}
+                onClick={() => handleSuggestionClick(student.usn)}
               >
                 {student.usn} - {student.name}
               </div>

@@ -1,5 +1,5 @@
 // src/components/AdminLogin.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AdminLogin.css';
 
@@ -12,6 +12,30 @@ function AdminLogin() {
   
   // Initialize navigate for redirection
   const navigate = useNavigate();
+  
+  // Check if already logged in on component mount
+  useEffect(() => {
+    const token = localStorage.getItem('adminToken');
+    if (token) {
+      // Verify token before redirecting
+      fetch('http://localhost:5000/api/admin/profile', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      .then(response => {
+        if (response.ok) {
+          navigate('/admin-dashboard');
+        } else {
+          // If token is invalid, remove it
+          localStorage.removeItem('adminToken');
+        }
+      })
+      .catch(() => {
+        localStorage.removeItem('adminToken');
+      });
+    }
+  }, [navigate]);
 
   // Email validation function for the specific format
   const validateEmail = (email) => {
@@ -20,7 +44,7 @@ function AdminLogin() {
   };
 
   // Handle login form submission
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     
     // Reset error state
@@ -41,19 +65,41 @@ function AdminLogin() {
     // Show loading state
     setIsLoading(true);
     
-    // Simulate authentication API call
-    // In production, replace with actual API call to your backend
-    setTimeout(() => {
-      // Reset loading state
-      setIsLoading(false);
+    try {
+      // Make API call to backend for authentication
+      const response = await fetch('http://localhost:5000/api/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
       
-      // For demo purposes, log the attempt
-      console.log('Login attempt with:', { email, password });
+      // Check content type before parsing as JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        // Not a JSON response
+        throw new Error('Server returned an invalid response. Please check if the backend is running.');
+      }
       
-      // Navigate to admin dashboard after successful login
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Authentication failed');
+      }
+      
+      // If login successful, store token and redirect
+      localStorage.setItem('adminToken', data.token);
+      
+      // Navigate to admin dashboard
       navigate('/admin-dashboard');
       
-    }, 1500); // Simulating network request delay
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err.message || 'Failed to login. The server may be down or unreachable.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -101,7 +147,13 @@ function AdminLogin() {
               <label htmlFor="admin-remember-me">Remember me</label>
             </div>
 
-            <a href="#" className="admin-forgot-password">Forgot your password?</a>
+            <button 
+              type="button" 
+              className="admin-forgot-password" 
+              onClick={() => alert("Contact your administrator to reset your password.")}
+            >
+              Forgot your password?
+            </button>
           </div>
 
           <button 
