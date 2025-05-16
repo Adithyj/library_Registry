@@ -44,7 +44,7 @@ const StudentRegistry = () => {
     <div className="p-5">
       {/* Logo Section */}
       <div className="logo-container">
-        <img src="/title_logo.jpg" alt="Logo" className="logo" />
+        <img src="title-logo.png" alt="Logo" className="logo" />
       </div>
 
       {/* Title Section */}

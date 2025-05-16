@@ -2,7 +2,7 @@
 
 /* Main container styling */
 body {
-  background-image: url('https://sahyadri.edu.in/_next/image?url=%2Fimages%2Fhome%2Fcollegeaerial.jpg&w=3840&q=75');
+   background-image: url('../assets/scem.jpg');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
