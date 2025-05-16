@@ -56,7 +56,7 @@ const CheckIn = () => {
     <div className="p-5 text-center">
       {/* Logo section */}
       <div className="logo-container">
-        <img src="/title_logo.jpg" alt="Logo" className="logo" />
+        <img src="title-logo.png" alt="Logo" className="logo" />
       </div>
 
       <h2 className="text-xl mb-3">Library Check-In</h2>

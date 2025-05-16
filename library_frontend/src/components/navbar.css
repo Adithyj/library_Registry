@@ -9,6 +9,7 @@ nav {
   z-index: 1000;
   padding: 0.75rem 1.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  animation: fadeIn 0.5s ease forwards;
 }
 
 /* List styling */
@@ -37,7 +38,7 @@ nav a {
 }
 
 /* Create beautiful hover effect */
-nav a:before {
+nav a::before {
   content: '';
   position: absolute;
   bottom: 0;
@@ -54,7 +55,7 @@ nav a:hover {
   background-color: rgba(255, 255, 255, 0.08);
 }
 
-nav a:hover:before {
+nav a:hover::before {
   width: 80%;
 }
 
@@ -67,16 +68,12 @@ nav a:active {
 nav a.active {
   background-color: rgba(96, 165, 250, 0.15);
   color: #fff;
+  box-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
 }
 
-nav a.active:before {
+nav a.active::before {
   width: 80%;
   background: #60a5fa;
-}
-
-/* Add a subtle glow effect for active items */
-nav a.active {
-  box-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
 }
 
 /* Responsive adjustments */
@@ -84,12 +81,12 @@ nav a.active {
   nav {
     padding: 0.6rem 1rem;
   }
-  
+
   nav ul {
     justify-content: space-around;
     width: 100%;
   }
-  
+
   nav a {
     padding: 0.4rem 0.8rem;
     font-size: 0.9rem;
@@ -98,19 +95,34 @@ nav a.active {
 
 /* Add a subtle animation when the page loads */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-nav {
+/* Staggered fade-in animation for nav items */
+nav li {
+  opacity: 0;
   animation: fadeIn 0.5s ease forwards;
 }
 
-/* Stagger the animation for the nav items */
-nav li:nth-child(1) { animation: fadeIn 0.5s ease 0.1s forwards; }
-nav li:nth-child(2) { animation: fadeIn 0.5s ease 0.2s forwards; }
-nav li:nth-child(3) { animation: fadeIn 0.5s ease 0.3s forwards; }
+nav li:nth-child(1) {
+  animation-delay: 0.1s;
+}
 
-nav li {
-  opacity: 0;
+nav li:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+nav li:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+nav li:nth-child(4) {
+  animation-delay: 0.4s;
 }

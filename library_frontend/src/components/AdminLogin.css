@@ -1,0 +1,173 @@
+/* src/components/AdminLogin.css */
+
+.admin-login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  /* background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%); */
+  padding: 20px;
+}
+
+.admin-login-card {
+  /* background-color: white; */
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.8), rgba(245, 247, 250, 0.8));
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 420px;
+  overflow: hidden;
+  padding: 2rem;
+}
+
+.admin-login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.admin-login-logo {
+  max-height: 80px;
+  margin-bottom: 1rem;
+}
+
+.admin-login-header h1 {
+  color: #1a365d;
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.admin-login-header h2 {
+  color: #4a5568;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.admin-login-form {
+  margin-bottom: 2rem;
+}
+
+.admin-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.admin-form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.admin-form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  color: #2d3748;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.admin-form-input:focus {
+  outline: none;
+  border-color: #3182ce;
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.25);
+}
+
+.admin-error-message {
+  background-color: #fed7d7;
+  color: #c53030;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.admin-remember-me {
+  display: flex;
+  align-items: center;
+}
+
+.admin-checkbox {
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.5rem;
+}
+
+.admin-forgot-password {
+  font-size: 0.875rem;
+  color: #3182ce;
+  font-weight: 500;
+  transition: color 0.2s ease-in-out;
+}
+
+.admin-forgot-password:hover {
+  color: #2c5282;
+  text-decoration: underline;
+}
+
+.admin-login-button {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: #3182ce;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.admin-login-button:hover {
+  background-color: #2c5282;
+}
+
+.admin-login-button:disabled {
+  background-color: #a0aec0;
+  cursor: not-allowed;
+}
+
+.admin-login-button.admin-loading {
+  position: relative;
+}
+
+.admin-login-footer {
+  text-align: center;
+}
+
+.admin-divider {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.admin-divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: #e2e8f0;
+}
+
+.admin-divider span {
+  position: relative;
+  background-color: white;
+  padding: 0 0.75rem;
+  color: #718096;
+  font-size: 0.875rem;
+}
+
+.admin-copyright {
+  color: #718096;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}

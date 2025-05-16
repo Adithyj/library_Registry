@@ -21,6 +21,11 @@ const Navbar = () => {
             Student Registry
           </Link>
         </li>
+        <li>
+          <Link to="/admin-login" className="hover:text-gray-400">
+            Admin Login
+          </Link>
+        </li>
       </ul>
     </nav>
   );
