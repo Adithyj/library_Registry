@@ -1,5 +1,6 @@
 // db.js
 const { Pool } = require('pg');
+const { parse } = require('pg-connection-string');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();  // <-- load .env
@@ -8,19 +9,20 @@ require('dotenv').config();  // <-- load .env
 let lastSuccessfulConnection = null;
 let connectionAttemptTime = null;
 
-// Create a connection pool with timeout-resistant configuration
+
+
+
+
+const connectionString = process.env.POSTGRES_URL;
+const config = parse(connectionString);
+
 const pool = new Pool({
-  user: process.env.DB_USER || 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || 'library_db',
-  password: process.env.DB_PASSWORD || 'postgres',
-  port: process.env.DB_PORT || 5432,
-  // Connection pool settings for better performance
-  max: 20, // Maximum number of clients in the pool
-  idleTimeoutMillis: 30000, // How long a client can be idle before being closed
-  connectionTimeoutMillis: 5000, // How long to wait for connection
-  // Log slow queries (over 200ms)
-  statement_timeout: 60000, // Timeout queries after 60 seconds
+  user: config.user,
+  host: config.host,
+  database: config.database,
+  password: config.password,
+  port: config.port,
+  ssl: { rejectUnauthorized: false },
 });
 
 // Single shared client for critical operations
