@@ -11,8 +11,8 @@ async function testDailySummary() {
     const dateArg = process.argv[2];
     const targetDate = dateArg ? new Date(dateArg) : new Date();
     
-    // Get email from command line or use default
-    const email = process.argv[3] || process.env.ADMIN_EMAIL;
+    // Use DEV email from .env
+    const email = process.env.DEV;
     
     console.log(`Generating report for: ${targetDate.toDateString()}`);
     console.log(`Will send to email: ${email}`);
@@ -27,7 +27,6 @@ async function testDailySummary() {
     console.log(`✅ Report generated successfully at: ${pdfPath}`);
     console.log('Note: The file will remain on disk since returnPath was set to true');
     
-    // Exit cleanly
     process.exit(0);
   } catch (error) {
     console.error('❌ Error testing daily summary:', error);
@@ -35,5 +34,4 @@ async function testDailySummary() {
   }
 }
 
-// Run the test
-testDailySummary(); 
+testDailySummary();

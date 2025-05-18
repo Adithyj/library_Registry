@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
 } from 'recharts';
-import { Calendar, Download, Users, Book, Clock, Filter, Search, Calendar as CalendarIcon, FileText, Upload } from 'lucide-react';
+import { Calendar, Download, Users, Book, Clock, Filter, Search, Calendar as CalendarIcon, FileText, Upload, UserPlus } from 'lucide-react';
 import './AdminDashboard.css';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -13,6 +13,7 @@ import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 import StudentImport from './admin/StudentImport';
 import titleLogo from '../assets/title-logo.png';
+import logoWatermark from '../assets/s-logo.jpg';
 
 function AdminDashboard() {
   const [entries, setEntries] = useState([]);
@@ -32,6 +33,39 @@ function AdminDashboard() {
   const [semesters, setSemesters] = useState([]);
   const [activeStudents, setActiveStudents] = useState([]);
   const [activeTab, setActiveTab] = useState('dashboard'); // New state for tab navigation
+  
+  // New states for modals
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [profileData, setProfileData] = useState({
+    name: adminProfile.name || 'Admin User',
+    email: adminProfile.email || 'admin@sahyadri.edu',
+    role: adminProfile.role || 'System Administrator',
+    department: adminProfile.department || 'Library Management',
+    joinDate: adminProfile.joinDate || '2023-01-01'
+  });
+  const [settingsData, setSettingsData] = useState({
+    darkMode: false,
+    emailNotifications: true,
+    smsNotifications: false,
+    language: 'English',
+    autoLogout: 30
+  });
+  
+  // Student form state
+  const [studentForm, setStudentForm] = useState({
+    usn: '',
+    name: '',
+    department: '',
+    semester: '',
+    email: '',
+    phone: '',
+    sendWhatsapp: false  // New field for WhatsApp notification toggle
+  });
+  const [formMode, setFormMode] = useState('initial'); // 'initial', 'search', 'add', or 'update'
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  
   const [stats, setStats] = useState({
     totalStudents: 0,
     activeEntries: 0,
@@ -40,10 +74,166 @@ function AdminDashboard() {
     semesterDistribution: []
   });
 
+  // Add class to body when component mounts
+  useEffect(() => {
+    document.body.classList.add('admin-dashboard-page');
+    
+    // Clean up function to remove class when component unmounts
+    return () => {
+      document.body.classList.remove('admin-dashboard-page');
+    };
+  }, []);
+
+  // Function to handle clicking outside the dropdown to close it
+  useEffect(() => {
+    function handleClickOutside(event) {
+      const dropdown = document.getElementById('profile-dropdown');
+      const profileMenu = document.querySelector('.admin-profile');
+      
+      if (dropdown && profileMenu && !profileMenu.contains(event.target)) {
+        dropdown.classList.remove('show');
+      }
+    }
+    
+    // Add event listener
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    // Clean up
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   // Function to generate colors for pie chart
   const getChartColor = (index) => {
     const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088fe', '#00c49f'];
     return colors[index % colors.length];
+  };
+
+  // Handle checkbox change specifically for the WhatsApp notification toggle
+  const handleCheckboxChange = (e) => {
+    const { name, checked } = e.target;
+    setStudentForm(prev => ({
+      ...prev,
+      [name]: checked
+    }));
+  };
+
+  // Handle form input changes
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setStudentForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Handle student search
+  const handleStudentSearch = async () => {
+    if (!studentForm.usn) {
+      alert('Please enter a USN to search');
+      return;
+    }
+    
+    try {
+      // Get admin token
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        alert('Authentication token missing. Please log in again.');
+        return;
+      }
+
+      // In a real implementation, you would fetch student data from the API
+      console.log(`Searching for student with USN: ${studentForm.usn}`);
+      
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Only keep the USN and reset other fields, letting user enter actual data
+      setStudentForm({
+        usn: studentForm.usn,
+        name: '',
+        department: '',
+        semester: '',
+        email: '',
+        phone: '',
+        sendWhatsapp: false
+      });
+      
+      // Set form mode to update
+      setFormMode('update');
+      
+      // Show the user that the search was successful
+      setSuccessMessage(`Student with USN ${studentForm.usn} found. Please update details.`);
+      setShowSuccessModal(true);
+      
+      // Auto hide the success message after 2 seconds
+      setTimeout(() => {
+        setShowSuccessModal(false);
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Error searching for student:', error);
+      alert(`Error searching for student: ${error.message}`);
+    }
+  };
+
+  // Handle form submission
+  const handleFormSubmit = async (mode) => {
+    try {
+      // Get admin token
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        alert('Authentication token missing. Please log in again.');
+        return;
+      }
+
+      // Validate form fields
+      if (!studentForm.usn || !studentForm.name || !studentForm.department || !studentForm.semester || !studentForm.email) {
+        alert('Please fill all required fields: USN, Name, Department, Semester, and Email');
+        return;
+      }
+
+      // Validate phone number if WhatsApp notifications are enabled
+      if (studentForm.sendWhatsapp && (!studentForm.phone || studentForm.phone.length < 10)) {
+        alert('Please enter a valid phone number for WhatsApp notifications');
+        return;
+      }
+
+      // In a real implementation, this would be an API call
+      // For demonstration, we'll simulate a successful update
+      console.log(`${mode === 'add' ? 'Adding' : 'Updating'} student:`, studentForm);
+      
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Show success message with information about notifications sent
+      let notificationDetails = 'Email notification sent';
+      if (studentForm.sendWhatsapp) {
+        notificationDetails += ' and WhatsApp message delivered';
+      }
+      
+      setSuccessMessage(`Student ${mode === 'add' ? 'added' : 'updated'} successfully! ${notificationDetails}.`);
+      setShowSuccessModal(true);
+      
+      // Reset form after submission with timeout
+      setTimeout(() => {
+        setStudentForm({
+          usn: '',
+          name: '',
+          department: '',
+          semester: '',
+          email: '',
+          phone: '',
+          sendWhatsapp: false
+        });
+        setFormMode('initial');
+        setShowSuccessModal(false);
+      }, 2000);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert(`Error ${formMode === 'add' ? 'adding' : 'updating'} student: ${error.message}`);
+    }
   };
 
   useEffect(() => {
@@ -167,6 +357,36 @@ function AdminDashboard() {
       });
       
       const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      
+      // Function to add watermark to each page
+      const addWatermark = (pageNumber) => {
+        doc.setPage(pageNumber);
+        
+        try {
+          // Add watermark image with low opacity
+          const wmWidth = 100; // Width of watermark
+          const wmHeight = 100; // Height of watermark
+          
+          // Position in the center of the page
+          const x = (pageWidth - wmWidth) / 2;
+          const y = (pageHeight - wmHeight) / 2;
+          
+          // Save current global settings
+          const currentGState = doc.getGState();
+          
+          // Set transparency for watermark
+          doc.setGState(new doc.GState({ opacity: 0.1 }));
+          
+          // Add the watermark image
+          doc.addImage(logoWatermark, 'JPEG', x, y, wmWidth, wmHeight);
+          
+          // Restore previous settings
+          doc.setGState(currentGState);
+        } catch (wmErr) {
+          console.warn('Could not add watermark image:', wmErr);
+        }
+      };
       
       // Add logo at the top
       try {
@@ -392,6 +612,9 @@ function AdminDashboard() {
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
         
+        // Add watermark to each page
+        addWatermark(i);
+        
         // Add decorative line
         doc.setDrawColor(75, 107, 251);
         doc.setLineWidth(0.5);
@@ -464,6 +687,88 @@ function AdminDashboard() {
     return new Date(dateString).toLocaleString();
   };
 
+  // Add logout function
+  const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    window.location.href = '/admin-login';
+  };
+
+  // Handle profile and settings modal open/close
+  const handleOpenProfileModal = () => {
+    setShowProfileModal(true);
+    document.getElementById('profile-dropdown').classList.remove('show');
+  };
+
+  const handleOpenSettingsModal = () => {
+    setShowSettingsModal(true);
+    document.getElementById('profile-dropdown').classList.remove('show');
+  };
+
+  const handleCloseModals = () => {
+    setShowProfileModal(false);
+    setShowSettingsModal(false);
+  };
+  
+  // Handle profile form changes
+  const handleProfileChange = (e) => {
+    const { name, value } = e.target;
+    setProfileData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  // Handle settings form changes
+  const handleSettingsChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setSettingsData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+  
+  // Handle profile update
+  const handleProfileUpdate = () => {
+    // In a real app, this would be an API call to update the user profile
+    console.log('Updating profile with:', profileData);
+    
+    // Update local adminProfile state to reflect changes
+    setAdminProfile({
+      ...adminProfile,
+      name: profileData.name,
+      email: profileData.email,
+      role: profileData.role,
+      department: profileData.department,
+      joinDate: profileData.joinDate
+    });
+    
+    // Show success message and close modal
+    setSuccessMessage('Profile updated successfully!');
+    setShowSuccessModal(true);
+    setShowProfileModal(false);
+    
+    // Auto hide success message
+    setTimeout(() => {
+      setShowSuccessModal(false);
+    }, 2000);
+  };
+  
+  // Handle settings update
+  const handleSettingsUpdate = () => {
+    // In a real app, this would be an API call to update user settings
+    console.log('Updating settings with:', settingsData);
+    
+    // Show success message and close modal
+    setSuccessMessage('Settings updated successfully!');
+    setShowSuccessModal(true);
+    setShowSettingsModal(false);
+    
+    // Auto hide success message
+    setTimeout(() => {
+      setShowSuccessModal(false);
+    }, 2000);
+  };
+
   if (isLoading) {
     return <div className="admin-dashboard loading"><p>Loading...</p></div>;
   }
@@ -477,8 +782,15 @@ function AdminDashboard() {
       {/* Header remains at the top */}
       <header className="dashboard-header">
         <div className="dashboard-title">
-          <h1>Library Dashboard</h1>
-          <p>Manage your library resources and activities</p>
+          <div className="title-with-icon">
+            <div className="dashboard-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            </div>
+            <div>
+              <h1>Sahyadri Library Dashboard</h1>
+              <p>Manage your library resources and activities</p>
+            </div>
+          </div>
         </div>
         <div className="dashboard-actions">
           <button className="action-btn" title="Help & Documentation">
@@ -492,13 +804,31 @@ function AdminDashboard() {
             <span className="notification-badge">2</span>
           </button>
         </div>
-        <div className="admin-profile">
+        <div className="admin-profile" onClick={() => document.getElementById('profile-dropdown').classList.toggle('show')}>
           <div className="admin-info">
             <p className="admin-name">{adminProfile.name || 'Admin User'}</p>
             <p className="admin-role">System Administrator</p>
           </div>
           <div className="admin-avatar">
             <img src="/admin-avatar.png" alt="Admin" />
+          </div>
+          <div className="profile-dropdown-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
+          <div id="profile-dropdown" className="profile-dropdown">
+            <div className="dropdown-item" onClick={handleOpenProfileModal}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              My Profile
+            </div>
+            <div className="dropdown-item" onClick={handleOpenSettingsModal}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+              Account Settings
+            </div>
+            <div className="dropdown-divider"></div>
+            <div className="dropdown-item logout" onClick={handleLogout}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+              Logout
+            </div>
           </div>
         </div>
       </header>
@@ -514,6 +844,12 @@ function AdminDashboard() {
                 <button onClick={() => setActiveTab('dashboard')}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
                   <span>Dashboard</span>
+                </button>
+              </li>
+              <li className={activeTab === 'studentInfo' ? 'active' : ''}>
+                <button onClick={() => setActiveTab('studentInfo')}>
+                  <UserPlus size={18} />
+                  <span>Student Info Management</span>
                 </button>
               </li>
               <li className={activeTab === 'studentImport' ? 'active' : ''}>
@@ -691,29 +1027,6 @@ function AdminDashboard() {
                 </div>
               </div>
 
-              {/* Quick Access Section */}
-              <div className="quick-access-section">
-                <h2>Quick Actions</h2>
-                <div className="quick-access-buttons">
-                  <button className="quick-access-btn" onClick={() => alert('Check-in Student feature coming soon')}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
-                    <span>Check-in Student</span>
-                  </button>
-                  <button className="quick-access-btn" onClick={() => alert('Check-out Student feature coming soon')}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                    <span>Check-out Student</span>
-                  </button>
-                  <button className="quick-access-btn" onClick={() => alert('Add New Book feature coming soon')}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path><line x1="12" y1="6" x2="12" y2="14"></line><line x1="8" y1="10" x2="16" y2="10"></line></svg>
-                    <span>Add New Book</span>
-                  </button>
-                  <button className="quick-access-btn" onClick={() => window.open(generatePDFReport(false))}>
-                    <FileText size={24} />
-                    <span>Generate Report</span>
-                  </button>
-                </div>
-              </div>
-
               {/* Charts */}
               <div className="dashboard-charts">
                 <div className="chart-container">
@@ -867,7 +1180,7 @@ function AdminDashboard() {
                         </div>
                         <div className="student-actions">
                           <button className="student-action-btn" title="Check Out">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3h18a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm14 14H7V5h10v14z"></path></svg>
                           </button>
                         </div>
                       </div>
@@ -955,12 +1268,397 @@ function AdminDashboard() {
                 )}
               </div>
             </>
+          ) : activeTab === 'studentInfo' ? (
+            /* Student Info Management Tab */
+            <div className="student-info-management">
+              <h2>Student Information Management</h2>
+              
+              {/* Step 1: Initial buttons for student management */}
+              {!studentForm.usn || formMode === 'initial' ? (
+                <div className="student-actions-container">
+                  <button 
+                    className="student-action-btn primary"
+                    onClick={() => setFormMode('search')}
+                  >
+                    Update Student Information
+                  </button>
+                  <button 
+                    className="student-action-btn secondary"
+                    onClick={() => {
+                      setStudentForm({
+                        usn: '',
+                        name: '',
+                        department: '',
+                        semester: '',
+                        email: '',
+                        phone: '',
+                        sendWhatsapp: false
+                      });
+                      setFormMode('add');
+                    }}
+                  >
+                    Add New Student
+                  </button>
+                </div>
+              ) : null}
+              
+              {/* Step 2: USN Search form */}
+              {formMode === 'search' && (
+                <div className="usn-search-container">
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Enter Student USN to Update</label>
+                      <div className="search-input-group">
+                        <input 
+                          type="text" 
+                          name="usn"
+                          value={studentForm.usn}
+                          onChange={handleFormChange}
+                          placeholder="Enter student USN" 
+                        />
+                        <button 
+                          className="action-button search"
+                          onClick={handleStudentSearch}
+                        >
+                          Search
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <button 
+                    className="action-button cancel"
+                    onClick={() => setFormMode('initial')}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+              
+              {/* Step 3: Full student form (only shown after USN search or in add mode) */}
+              {(formMode === 'update' || formMode === 'add') && (
+                <div className="student-update-form">
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>USN</label>
+                      <input 
+                        type="text" 
+                        name="usn"
+                        value={studentForm.usn}
+                        onChange={handleFormChange}
+                        placeholder="Enter student USN" 
+                        readOnly={formMode === 'update'}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Name</label>
+                      <input 
+                        type="text" 
+                        name="name"
+                        value={studentForm.name}
+                        onChange={handleFormChange}
+                        placeholder="Enter student name" 
+                      />
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Department</label>
+                      <select
+                        name="department"
+                        value={studentForm.department}
+                        onChange={handleFormChange}
+                      >
+                        <option value="">Select Department</option>
+                        {departments.map(dept => (
+                          <option key={dept} value={dept}>{dept}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Semester</label>
+                      <select
+                        name="semester"
+                        value={studentForm.semester}
+                        onChange={handleFormChange}
+                      >
+                        <option value="">Select Semester</option>
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map(sem => (
+                          <option key={sem} value={sem}>Semester {sem}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Email</label>
+                      <input 
+                        type="email" 
+                        name="email"
+                        value={studentForm.email}
+                        onChange={handleFormChange}
+                        placeholder="Enter student email" 
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Phone</label>
+                      <input 
+                        type="text" 
+                        name="phone"
+                        value={studentForm.phone}
+                        onChange={handleFormChange}
+                        placeholder="Enter student phone" 
+                      />
+                    </div>
+                  </div>
+                  <div className="form-row whatsapp-row">
+                    <div className="form-group whatsapp-toggle">
+                      <label className="checkbox-container">
+                        <input
+                          type="checkbox"
+                          name="sendWhatsapp"
+                          checked={studentForm.sendWhatsapp}
+                          onChange={handleCheckboxChange}
+                        />
+                        <span className="custom-checkbox"></span>
+                        Send WhatsApp notification in addition to email
+                      </label>
+                      {studentForm.sendWhatsapp && (
+                        <p className="whatsapp-note">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                          A WhatsApp message with student details will be sent to the phone number above
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="form-actions">
+                    <button 
+                      className="action-button update"
+                      onClick={() => handleFormSubmit(formMode)}
+                    >
+                      {formMode === 'add' ? 'Add Student' : 'Update Student'}
+                    </button>
+                    <button 
+                      className="action-button cancel"
+                      onClick={() => setFormMode('initial')}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           ) : (
             /* Student Import Tab */
             <StudentImport />
           )}
         </div>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="success-modal">
+          <div className="modal-content">
+            <div className="success-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <h2>{successMessage}</h2>
+            <button onClick={() => setShowSuccessModal(false)}>Close</button>
+          </div>
+        </div>
+      )}
+      
+      {/* Profile Modal */}
+      {showProfileModal && (
+        <div className="modal-overlay">
+          <div className="modal-container">
+            <div className="modal-header">
+              <h2>My Profile</h2>
+              <button className="close-btn" onClick={handleCloseModals}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="profile-avatar-section">
+                <div className="large-avatar">
+                  <img src="/admin-avatar.png" alt="Profile" />
+                </div>
+                <button className="upload-avatar-btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                  Upload Photo
+                </button>
+              </div>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Full Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={profileData.name}
+                    onChange={handleProfileChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={profileData.email}
+                    onChange={handleProfileChange}
+                  />
+                </div>
+              </div>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Role</label>
+                  <input
+                    type="text"
+                    name="role"
+                    value={profileData.role}
+                    onChange={handleProfileChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Department</label>
+                  <input
+                    type="text"
+                    name="department"
+                    value={profileData.department}
+                    onChange={handleProfileChange}
+                  />
+                </div>
+              </div>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Join Date</label>
+                  <input
+                    type="date"
+                    name="joinDate"
+                    value={profileData.joinDate}
+                    onChange={handleProfileChange}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="cancel-btn" onClick={handleCloseModals}>Cancel</button>
+              <button className="save-btn" onClick={handleProfileUpdate}>Save Changes</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Modal */}
+      {showSettingsModal && (
+        <div className="modal-overlay">
+          <div className="modal-container">
+            <div className="modal-header">
+              <h2>Account Settings</h2>
+              <button className="close-btn" onClick={handleCloseModals}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="settings-section">
+                <h3>Appearance</h3>
+                <div className="setting-item">
+                  <div className="setting-label">
+                    <span>Dark Mode</span>
+                    <p className="setting-description">Enable dark theme for the dashboard</p>
+                  </div>
+                  <label className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      name="darkMode"
+                      checked={settingsData.darkMode}
+                      onChange={handleSettingsChange}
+                    />
+                    <span className="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+              
+              <div className="settings-section">
+                <h3>Notifications</h3>
+                <div className="setting-item">
+                  <div className="setting-label">
+                    <span>Email Notifications</span>
+                    <p className="setting-description">Receive email notifications</p>
+                  </div>
+                  <label className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      name="emailNotifications"
+                      checked={settingsData.emailNotifications}
+                      onChange={handleSettingsChange}
+                    />
+                    <span className="toggle-slider"></span>
+                  </label>
+                </div>
+                
+                <div className="setting-item">
+                  <div className="setting-label">
+                    <span>SMS Notifications</span>
+                    <p className="setting-description">Receive SMS alerts for important events</p>
+                  </div>
+                  <label className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      name="smsNotifications"
+                      checked={settingsData.smsNotifications}
+                      onChange={handleSettingsChange}
+                    />
+                    <span className="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+              
+              <div className="settings-section">
+                <h3>Preferences</h3>
+                <div className="setting-item">
+                  <div className="setting-label">
+                    <span>Language</span>
+                  </div>
+                  <select
+                    name="language"
+                    value={settingsData.language}
+                    onChange={handleSettingsChange}
+                    className="settings-select"
+                  >
+                    <option value="English">English</option>
+                    <option value="Hindi">Hindi</option>
+                    <option value="Kannada">Kannada</option>
+                  </select>
+                </div>
+                
+                <div className="setting-item">
+                  <div className="setting-label">
+                    <span>Auto Logout</span>
+                    <p className="setting-description">Automatically log out after inactivity (minutes)</p>
+                  </div>
+                  <select
+                    name="autoLogout"
+                    value={settingsData.autoLogout}
+                    onChange={handleSettingsChange}
+                    className="settings-select"
+                  >
+                    <option value="15">15 minutes</option>
+                    <option value="30">30 minutes</option>
+                    <option value="60">1 hour</option>
+                    <option value="120">2 hours</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="cancel-btn" onClick={handleCloseModals}>Cancel</button>
+              <button className="save-btn" onClick={handleSettingsUpdate}>Save Changes</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

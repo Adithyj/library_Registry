@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import CheckIn from './components/CheckIn';
 import CheckOut from './components/CheckOut';
 import StudentRegistry from './components/StudentRegistry';
@@ -9,10 +9,14 @@ import Footer from './components/Footer';
 import AdminLogin from './components/AdminLogin'; 
 import AdminDashboard from './components/AdminDashboard';  
 
-function App() {
+// Wrapper component to conditionally render Navbar and Footer
+function AppContent() {
+  const location = useLocation();
+  const isAdminDashboard = location.pathname === '/admin-dashboard';
+
   return (
-    <Router>
-      <Navbar />
+    <>
+      {!isAdminDashboard && <Navbar />}
       <div className="container">
         <Routes>
           <Route path="/" element={<CheckIn key="check-in" />} />
@@ -23,7 +27,15 @@ function App() {
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
         </Routes>
       </div>
-      <Footer />
+      {!isAdminDashboard && <Footer />}
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }

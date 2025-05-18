@@ -1,5 +1,4 @@
 const db = require('../db');
-const bcrypt = require('bcryptjs');
 
 /**
  * Import a list of students into the database
@@ -17,7 +16,7 @@ async function importStudents(students) {
   };
   
   // Create a client from the pool
-  const client = await db.getClient();
+  const client = await db.getDedicatedClient();
   
   try {
     // Start transaction
@@ -25,9 +24,6 @@ async function importStudents(students) {
     
     for (const student of students) {
       try {
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(student.password, 10);
-        
         // Check if student already exists
         const checkQuery = 'SELECT usn FROM students WHERE usn = $1';
         const checkResult = await client.query(checkQuery, [student.usn]);
@@ -36,8 +32,8 @@ async function importStudents(students) {
           // Student exists, update
           const updateQuery = `
             UPDATE students 
-            SET name = $1, email = $2, department = $3, semester = $4, phone = $5, password = $6
-            WHERE usn = $7
+            SET name = $1, email = $2, department = $3, semester = $4, phone = $5
+            WHERE usn = $6
             RETURNING *
           `;
           
@@ -47,7 +43,6 @@ async function importStudents(students) {
             student.department,
             student.semester,
             student.phone,
-            hashedPassword,
             student.usn
           ];
           
@@ -60,8 +55,8 @@ async function importStudents(students) {
         } else {
           // Insert new student
           const insertQuery = `
-            INSERT INTO students (usn, name, email, department, semester, phone, password)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            INSERT INTO students (usn, name, email, department, semester, phone)
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *
           `;
           
@@ -71,8 +66,7 @@ async function importStudents(students) {
             student.email,
             student.department,
             student.semester,
-            student.phone,
-            hashedPassword
+            student.phone
           ];
           
           const insertResult = await client.query(insertQuery, insertValues);

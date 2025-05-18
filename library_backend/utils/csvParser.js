@@ -117,20 +117,9 @@ function validateStudentRow(row, rowNum) {
       department: row.branch.trim(), // Map branch to department field in database
       semester: semester,
       email: row.email.trim().toLowerCase(),
-      phone: row.phone ? row.phone.trim() : null,
-      password: generateDefaultPassword() // Generate default password
+      phone: row.phone ? row.phone.trim() : null
     }
   };
-}
-
-/**
- * Generate a random default password for new students
- * 
- * @returns {string} A randomly generated password
- */
-function generateDefaultPassword() {
-  // Generate a random 8-character password
-  return Math.random().toString(36).substring(2, 10);
 }
 
 module.exports = {

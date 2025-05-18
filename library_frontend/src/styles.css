@@ -9,12 +9,24 @@ body {
   min-height: 100vh;
 }
 
+/* Create a separate style for admin dashboard page */
+body.admin-dashboard-page {
+  background-image: none;
+  background-color: white;
+}
+
 /* Main container for content */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
   flex-grow: 1; /* Ensure content area takes up remaining space */
+}
+
+/* Container for admin dashboard should be full width */
+.admin-dashboard-page .container {
+  max-width: 100%;
+  padding: 0;
 }
 
 /* Navbar styling */
